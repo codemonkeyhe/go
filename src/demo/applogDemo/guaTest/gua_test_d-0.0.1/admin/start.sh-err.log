@@ -1,0 +1,6 @@
+2018-01-24 22:16:02| 2725 | Get lock succeed , called by [11701 -bash]
+2018-01-24 22:16:02| 2725 | Insert my pid (2725) into ./.start.sh.pid
+2018-01-24 22:19:30| 15374 | Get lock succeed , called by [11701 -bash]
+2018-01-24 22:19:30| 15374 | Insert my pid (15374) into ./.start.sh.pid
+2018-01-24 22:44:16| 27354 | Get lock succeed , called by [11701 -bash]
+2018-01-24 22:44:16| 27354 | Insert my pid (27354) into ./.start.sh.pid

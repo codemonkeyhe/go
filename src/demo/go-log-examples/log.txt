@@ -1,0 +1,6 @@
+[36m17:06:09.107 main ▶ DEBU 001[0m debug ******
+[32m17:06:09.107 main ▶ NOTI 002[0m notice
+[33m17:06:09.107 main ▶ WARN 003[0m warning
+17:06:09.107 main ▶ INFO 004[0m info
+[31m17:06:09.107 main ▶ ERRO 005[0m err
+[35m17:06:09.107 main ▶ CRIT 006[0m crit

@@ -1,0 +1,11 @@
+#include "include/foo.h"
+
+int main ()
+{
+    fun1();
+    int a = 4;
+    fun2(a);
+    void **b = NULL;
+    fun3(b);
+    return 0;
+}

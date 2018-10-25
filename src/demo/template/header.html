@@ -1,0 +1,28 @@
+Title is {{.Title}}
+{{template "foot" .}}
+
+
+{{/* 
+这才是模板的注释
+注释里面不能再嵌套C++的注释对，否则报错 
+
+
+
+错误写法1
+Title is \{\{.Title\}\}
+\{\{template "foot"\}\}
+
+错误写法2  这样写的话foot的模板变量不会被数据绑定
+{{template "foot"}}
+{{template "name"}}： 指定名字为 name 的模板并以 nil 的数据渲染
+{{template "name" pipeline}}：执行名字为 name 的模板，并以 pipeline 的值渲染
+
+
+
+*/}}
+
+
+<!--
+也可以采用HTML的注释
+ <div><H1>Hello</H1></div>
+ -->

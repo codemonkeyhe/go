@@ -1,0 +1,10 @@
+静态库demo
+
+1. 生成.o文件
+gcc -c foo.c
+
+2. 打包成.a文件
+ar crv  libfoo.a foo.o
+
+3. 调用静态库
+go build -o test

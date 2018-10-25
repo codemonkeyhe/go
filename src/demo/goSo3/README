@@ -1,0 +1,41 @@
+ gcc foo.c -fPIC -shared -o ./lib/libfoo.so
+
+ 正确做法1
+ go build
+ 
+ 正确做法2
+ go build -o test
+
+ 正确做法3
+ 前提：自己在LDFLAGS里面指定了运行时动态库的目录 -Wl,-rpath ./lib/
+ go build -o test main.go
+
+
+
+ 错误方法
+[monkey@bogon goSo3]$go build -o test main.go
+[monkey@bogon goSo3]$./test 
+./test: error while loading shared libraries: libfoo.so: cannot open shared object file: No such file or directory
+[monkey@bogon goSo3]$vi main.go  在这里修改LDFLAGS,追加-Wl,-rpath ./lib 即可
+[monkey@bogon goSo3]$go build -o test main.go
+[monkey@bogon goSo3]$./test 
+6
+I am foo!
+
+
+ 错误方法2
+把.c文件命名为.cpp文件，虽然命令还是gcc，但实际上已经按照c++的规则去编译了。所以导致错误。
+gcc foo.cpp -fPIC -shared -o ./lib/libfoo.so
+
+因为foo.c里面的
+int count =6;是不会报错的 
+而改成了foo.cpp后，同样的语句报错，被认为是重定义。即foo.h定义了int count; cpp再次重定义，此时需要改造foo.h，改为extern int count才行。
+于是可以证明 是按照c++的规则，因为按照C的规则不会报重定义的错误.
+
+[monkey@bogon goSo3]$go build
+# code/goSo3
+/tmp/go-build833648810/code/goSo3/_obj/foo.cgo2.o: In function `_cgo_a0c92955fe78_Cfunc_foo':
+/tmp/go-build/code/goSo3/_obj/cgo-gcc-prolog:37: undefined reference to `foo'
+collect2: ld returned 1 exit status
+
+

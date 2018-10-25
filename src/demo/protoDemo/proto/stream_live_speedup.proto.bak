@@ -1,0 +1,100 @@
+syntax = "proto3";
+package protocol.stream_manager;
+
+// 流信息
+message StreamInfo{
+  string stream_name = 1;
+  uint32 appid = 2;
+  uint32 bid = 3; // businessid;
+  int64 uid = 4; // 注意：mongo中为int64。
+  int64 cid = 5; // 注意：mongo中为int64。
+  int64 sid = 6; // 注意：mongo中为int64。
+  uint32 mic_no = 7; // 首麦，二麦，扩展（1号视频，2号视频，3号视频。。。）
+  string json = 8; // 流属性，如帧率，码率，分辨率，编码类型（h264，h265）
+  uint32 audio_video_group = 9;// 语音视频配对。
+  string metadata = 10; // 透传，最大255字节。
+  string stream_group = 11; // 群组,语音
+  //enum STREAM_MIX {
+  //  SM_INIT = 0; // 初始 
+  //  SM_RAW = 1; // 原画 
+  //  SM_RAW2 = 2; // 原画流，由于连麦，会出现多条记录
+  //  SM_MIX = 3; // 混画
+  //  SINGLE_MIX = 4; // 纯混（纯音频混或纯视频混）
+  //  SM_TRANS_CODE = 5; // 转码
+  //};
+  uint32 mix = 12; // 原画或混画标志。参考：STREAM_MIX
+  string extend = 13; // 扩展，混画原画流名称
+  //enum STREAM_TYPE {
+  //  ST_INIT = 0; // 初始 
+  //  ST_AUDIO = 1; // 音
+  //  ST_VIDEO = 2; // 画 
+  //  ST_GROUP = 3; // 群组 
+  //  ST_BC_AUDIO = 4; // 暂不使用
+  //  ST_BC_GROUP = 5; // 顶级频道广播
+  //};
+  uint32 type = 14; // 语音，视频，混流； 参考：STREAM_TYPE
+  uint64 ver = 15;
+  uint32 gear = 16; // 档位
+  uint32 mix_group_no = 17; // 混画组编号,同一个组音视频可以任意配对，若为0.说明未启用混画组功能
+  uint32 rate             = 18; // 码率
+  uint32 encoder_type     = 19; // 音视频编码
+};
+
+
+message ChannelStreamInfo {
+  uint64 version = 1;
+  repeated StreamInfo streams = 2;
+}
+
+
+// 透传秒开信息
+message AvpPayload {
+  //下面信息媒体中心的返回结果，里面包含播放地址
+  string addr = 1;
+  string sslAddr = 2;
+  uint32 create_time = 3;
+  uint32 expire_time = 4;       //地址失效时间，媒体中心期望是过期后，重新刷新地址
+  repeated string stream_names           = 5;  // 秒开数据中包含的待选流名称列表
+}
+
+
+message LiveKey {
+  uint32 appid                            = 1;
+  int64 cid                              = 2;
+  int64 sid                              = 3;
+}
+
+message LiveInfo {
+  LiveKey live_key                        = 1; 
+  ChannelStreamInfo channel_stream_info   = 2;     // 频道流数据
+  AvpPayload avp_payload                  = 3;    // avp 结果   
+}
+
+
+enum ResultCode{
+  kSuccess                = 0; // |成功|
+  kErrorServerBusy        = 1; // |服务忙，暂不处理客户端请求，客户端应暂停发送请求一段时间|
+  kErrorInternal          = 2; // | 表示系统错误|
+  kErrorRequestParam      = 3; // | 请求参数错误|
+  kErrorPermissionDenied  = 4; // | 权限验证失败|
+  kErrorBusiness          = 5; // | 业务逻辑错误(比如某些业务操作需要的条件不满足)|
+  kErrorWriteList         = 6; // | 频道未在新系统开放|  
+}
+
+
+// 频道流名称查询请求 (进频道获取,秒开)
+message ChannelStreamsQueryReq {
+  uint64 sequence                         = 1;
+  repeated LiveKey live_keys              = 2;
+}
+
+// 频道流名称查询结果
+message ChannelStreamsQueryResp {
+  uint32 res_code                         = 1;     // 0 成功， 其他都是失败, 见 ResultCode
+  string res_msg                          = 2;    // 错误提示
+  uint64 sequence                         = 3;     
+  repeated LiveInfo live_infos            = 4;
+}
+
+
+
