@@ -22,6 +22,7 @@ var port = flag.String("port", "3333", "port")
 var bOrigin = true
 
 /*
+https://colobu.com/2014/12/02/go-socket-programming-TCP/
 D:\SvnRepo\go\src\demo\tcp>tcp --help
 Usage of tcp:
   -host string
