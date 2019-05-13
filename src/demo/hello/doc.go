@@ -3,4 +3,4 @@
 /*
 tt document
 */
-package tt
+package main

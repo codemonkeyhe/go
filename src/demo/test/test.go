@@ -5,13 +5,17 @@ import "fmt"
 import "path"
 import "net/url"
 import "encoding/json"
-import "demo/test/tt"
+import "demo/tt"
 import "time"
 import "strconv"
 import "container/list"
 import "runtime"
 import "math/rand"
 import "context"
+import "unsafe"
+import "strings"
+import "sync"
+import "bytes"
 
 //import "math/rand"
 //import "sync/atomic"
@@ -29,9 +33,299 @@ type student struct {
 	Param []PostParam
 }
 
+func ff() (*int, error) {
+	var b int = 3
+	//return &b, nil
+	return &b, fmt.Errorf("TEST")
+}
+
+func hole1() (err error) {
+	var a *int
+	if a, err := ff(); err != nil {
+		fmt.Printf("%+v", err)
+	} else {
+		fmt.Printf("inside a: %+v\n", *a)
+	}
+	fmt.Printf("outsize a: %+v\n", a)
+	return
+}
+
+func hole2() error {
+	var err error
+	var a *int
+	if a, err := ff(); err != nil { //a和err都是if的局部变量，屏蔽了外层的err,a
+		//if a, err = ff(); err != nil {
+		fmt.Printf("%+v\n", err)
+	} else {
+		fmt.Printf("inside a: %+v\n", *a)
+	}
+	fmt.Printf("outsize a: %+v\n", a)
+	fmt.Printf("outsize err: %+v\n", err)
+	if a != nil {
+		fmt.Printf("outsize a=: %+v\n", *a)
+	}
+	return err
+}
+
+type persistConn struct {
+	broken bool // an error has happened on this connection; marked broken so it's not reused.
+	reused bool
+}
+
+func getParam(arr []int, md map[int]*PostParam, md2 map[int]PostParam) {
+	fmt.Printf("len=%d cap=%d\n", len(arr), cap(arr))
+	arr = append(arr, 1)
+	fmt.Printf("len=%d cap=%d\n", len(arr), cap(arr))
+	md[3] = &PostParam{
+		Cid: 123,
+		Uid: 456,
+	}
+	md2[11] = PostParam{
+		Cid: 111,
+		Uid: 444,
+	}
+}
+
+func ap(a []int) {
+	a = append(a, 10)
+}
+
+func add(a *[]int) {
+	*a = append(*a, 3)
+	*a = append(*a, 4)
+	*a = append(*a, 5)
+}
+
+func ffff() (string, error) {
+	return "test scope of variable", nil
+}
+
+// 可变长参数
+func sum(nums ...int) {
+	fmt.Print(nums, " ")
+	total := 0
+	for _, num := range nums {
+		total += num
+	}
+	fmt.Println(total)
+}
+
+func wrapSum(nums ...int) {
+	sum(nums...)
+}
+
+func wrapSum2(nums []int) {
+	sum(nums...)
+}
+
+func f123(bbool *bool) {
+	*bbool = true
+}
+
 func main() {
+	fmt.Print(strings.TrimLeft(" \t\n  \r 123Hello, 111111", "\r\t\n "))
+	fmt.Print(strings.TrimLeft("¡¡¡!!!Hello, Gophers!!!", "!¡"))
+	fmt.Println(strings.Replace("oinkkk oink oink", "k", "ky", 10))
+	fmt.Println(strings.TrimSpace(" \t\n Hello, Gophers \n\t\r\n123"))
+	if false {
+		bbool := false
+		f123(&bbool)
+		fmt.Println("b=", bbool)
+		strconv.Atoi()
+
+	}
+	if false { // slice len 清0 cap不变
+		letters := []string{"a", "b", "c", "d"}
+		fmt.Println(cap(letters))
+		fmt.Println(len(letters))
+		// clear the slice
+		letters = letters[:0]
+		fmt.Println(cap(letters))
+		fmt.Println(len(letters))
+	}
+
+	if false {
+		var b bytes.Buffer
+		str1 := "this is a first string"
+
+		str2 := " this is a second string"
+
+		b.WriteString(str1)
+
+		b.WriteString(str2)
+
+		str3 := b.String()
+		fmt.Printf("%+v\n", str3)
+		b.Truncate(10)
+		fmt.Printf("%+v\n", b.String())
+		//i := 0
+		j := 0
+		//j = i++
+		fmt.Println(j)
+	}
+
+	if false {
+		m1 := make(map[int32]int32)
+
+		m1[123] = 1
+		m1[456] = 1
+		m1[789] += 2
+		m1[123] += 2
+		m1[555]++
+		m1[555]++
+		m1[555]++
+		ss := m1[111]
+		fmt.Printf("%+v ss:%d\n", m1, ss)
+
+	}
+
+	if false {
+		failLogName := fmt.Sprintf("fail.%d.txt", time.Now().Unix())
+		file, err := os.OpenFile(failLogName, os.O_CREATE|os.O_TRUNC, 0666)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		defer file.Close()
+		data := "/b/core.jpg"
+		file.WriteString(data)
+		file.WriteString("\n")
+		file.WriteString(data)
+	}
+	if false { // WaitGroup 的坑
+		var n sync.WaitGroup
+		ic := make(chan int)
+		n.Add(1) //这个add非常重要，这里不add的话，可能下面的go线程还没来得及add(1)，然后就到了wait()直接退出了
+		go func(n *sync.WaitGroup) {
+			defer n.Done()
+			for i := 0; i < 3; i++ {
+				n.Add(1)
+				go func(i int, n *sync.WaitGroup, ic chan<- int) {
+					defer n.Done()
+					ic <- i
+				}(i, n, ic)
+			}
+		}(&n)
+
+		go func() {
+			n.Wait()
+			fmt.Println("close ch")
+			close(ic)
+		}()
+		for i := range ic {
+			fmt.Println(i)
+		}
+	}
+
+	if false {
+		ic := make(chan int)``
+		go func() {
+			ic <- 1
+			ic <- 2
+			close(ic)
+		}()
+		go func() {
+			for i := range ic {
+				fmt.Println(i)
+			}
+		}()
+	}
+
+	if false {
+		var b *bool
+		if b == nil {
+			fmt.Println("b=null")
+		}
+		b = new(bool)
+		//*b = true
+		if b == nil {
+			fmt.Println("b=null")
+		} else {
+			fmt.Println("b=", *b)
+		}
+
+		//b = nil
+		//
+		//
+	}
+
+	if false { // 可变长参数
+		sum(1, 2, 3)
+		nums := []int{1, 2, 3, 4}
+		sum(nums...)
+		wrapSum(1, 2, 3, 4, 5)
+		wrapSum2(nums)
+	}
+
 	runtime.GOMAXPROCS(8)
-	if true {
+	if false {
+		println(20010 | 134217728)
+	}
+
+	if false {
+		var name string
+		//name := "HI"
+		if name, err := ffff(); nil == err {
+			println(name) //符合预期，预期是 test scope of variable
+		}
+		println(name) //空白，不合符预期，预期是 test scope of variable
+	}
+
+	if false {
+		s := make([]int, 0, 0)
+		add(&s)
+		fmt.Printf("%+v\n", s)
+	}
+
+	if false {
+		a := []int{}
+		a = append(a, 7, 8, 9)
+		fmt.Printf("len: %d cap:%d data:%+v\n", len(a), cap(a), a)
+		ap(a)
+		fmt.Printf("len: %d cap:%d data:%+v\n", len(a), cap(a), a)
+		p := unsafe.Pointer(&a[2])
+		q := uintptr(p) + 8
+		t := (*int)(unsafe.Pointer(q))
+		fmt.Println(*t)
+	}
+
+	if false {
+		a := []int{7, 8, 9}
+		fmt.Printf("len: %d cap:%d data:%+v\n", len(a), cap(a), a)
+		ap(a)
+		fmt.Printf("len: %d cap:%d data:%+v\n", len(a), cap(a), a)
+		p := unsafe.Pointer(&a[2])
+		q := uintptr(p) + 8
+		t := (*int)(unsafe.Pointer(q))
+		fmt.Println(*t)
+	}
+
+	if false { //slice作为函数参数
+		arr := make([]int, 0, 4)
+		fmt.Printf("len=%d cap=%d\n", len(arr), cap(arr))
+		md := make(map[int]*PostParam)
+		md2 := make(map[int]PostParam)
+		getParam(arr, md, md2)
+		fmt.Printf("len=%d cap=%d\n", len(arr), cap(arr))
+		fmt.Printf("%+v\n", arr)
+		fmt.Printf("%+v\n", md)
+		fmt.Printf("%+v\n", md2)
+	}
+
+	if false {
+		idleConnCh := make(map[string]chan *persistConn)
+		key := "123"
+		waitingDialer := idleConnCh[key]
+		fmt.Println("%+v", waitingDialer) //访问不存在的元素 为值类型的空值nil,而且map不会新增元素
+		fmt.Println("%#v", idleConnCh)
+	}
+
+	if false {
+		//		hole1()
+		hole2()
+	}
+
+	if false {
 		var p *PostParam = &PostParam{
 			Cid: 2,
 			Uid: 1,
@@ -106,8 +400,12 @@ func main() {
 		err = nil
 		fmt.Printf("err:%v", err)
 	}
-	if false {
-		fmt.Println(time.Now().UnixNano())
+	if true {
+		//fmt.Println(time.Now().UnixNano())
+		fmt.Println(time.Now().Unix())
+		fmt.Println(time.Now().Hour())
+		fmt.Println(time.Now().Minute())
+
 	}
 
 	if false {
