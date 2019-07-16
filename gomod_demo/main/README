@@ -1,0 +1,52 @@
+goMod引用本地包
+法1 replace  
+法2 GOPROXY 
+法3 go vendor+shell设置GOPATH
+
+
+error case
+
+err#1
+set GOPROXY=e:/gitPro/go/go-proxy
+go: local/xyz/testmod@v0.0.0: invalid $GOPROXY setting: malformed URL or invalid scheme (must be http, https, file)
+https://blogs.msdn.microsoft.com/ie/2006/12/06/file-uris-in-windows/
+
+err#2
+set GOPROXY=file://E:/gitPro/go/go-proxy
+build main_mod: cannot load local/xyz/testmod: cannot find module providing package local/xyz/testmod
+
+err#3
+import local/xyz/testmod
+E:\gitPro\go\gomod_demo\main>go build -o mod_demo.exe
+build main_mod: cannot load local/xyz/testmod: cannot find module providing package local/xyz/testmod
+
+err#4
+import local.com/xyz/testmod
+set GOPROXY=file:///E:/gitPro/go/go-proxy
+go: local.com/xyz/testmod@v1.0.0: open /E:/gitPro/go/go-proxy/local.com/xyz/testmod/@v/v1.0.0.info: The filename, directory name, or volume label syntax is incorrect.
+
+
+err#5 v1.0.0.zip没准备好
+E:\gitPro\go\gomod_demo\main>go build -o mod_demo.exe
+go: downloading local.com/xyz/testmod v1.0.0
+build main_mod: cannot load local.com/xyz/testmod: open /E:/gitPro/go/go-proxy/local.com/xyz/testmod/@v/v1.0.0.zip: The filename, directory name, or volume label syntax is incorrect.
+
+err#6
+set GOPROXY=file:///E:/gitPro/go/go-proxy
+E:\gitPro\go\gomod_demo\main>go build -o mod_demo.exe
+go: downloading local.com/xyz/testmod v1.0.0
+build main_mod: cannot load local.com/xyz/testmod: zip for local.com/xyz/testmod@v1.0.0 has unexpected file local.com/
+改成 set GOPROXY=file://E:/gitPro/go/go-proxy
+通过查看E:\GoOpen\pkg\mod\cache\download 查看包下载到哪一步了，推出 file:///E是错误路径
+
+
+err#7
+制作v1.0.0.zip 
+不能用windows的压缩工具，否则一定会报错！！
+如何证明是压缩工具的问题？
+从github拷贝同名压缩包，在不解压的前提下，用rar打开压缩包来编辑，只修改目录名，就能正常运行。
+从github拷贝同名压缩包，解压后，不做任何修改，再次压缩，则报错。所以fuck windows rar!!
+E:\gitPro\go\gomod_demo\main>go build -o mod_demo.exe
+go: finding local.com/xyz/testmod v1.0.0
+go: downloading local.com/xyz/testmod v1.0.0
+build main_mod: cannot load local.com/xyz/testmod: zip for local.com/xyz/testmod@v1.0.0 has unexpected file v1.0.0/
