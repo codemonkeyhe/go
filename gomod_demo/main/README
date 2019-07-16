@@ -49,4 +49,8 @@ err#7
 E:\gitPro\go\gomod_demo\main>go build -o mod_demo.exe
 go: finding local.com/xyz/testmod v1.0.0
 go: downloading local.com/xyz/testmod v1.0.0
-build main_mod: cannot load local.com/xyz/testmod: zip for local.com/xyz/testmod@v1.0.0 has unexpected file v1.0.0/
+build main_mod: cannot load local.com/xyz/testmod: zip for local.com/xyz/testmod@v1.0.0 has unexpected file local.com/
+
+Tips
+若goMod缓存已经下载好了包裹了，直接把GOPROXY指向缓存目录一样可行
+set GOPROXY=file://E:/GoOpen/pkg/mod/cache/download
