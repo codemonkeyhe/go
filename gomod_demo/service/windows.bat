@@ -20,10 +20,8 @@ echo %PATH%
 echo on
 
 ::set GOPROXY=file://E:/GoOpen/pkg/mod/cache/download
-set GOPROXY=file://E:/gitPro/go/go-proxy
-
-
-echo GOPROXY=%GOPROXY%
+::set GOPROXY=file://E:/gitPro/go/go-proxy
+::echo GOPROXY=%GOPROXY%
 
 
 del /F/S/Q .\%name% 
