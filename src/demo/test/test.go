@@ -4,7 +4,7 @@ import "os"
 import "fmt"
 import "path"
 import "net/url"
-import "encoding/json"
+
 import "demo/tt"
 import "time"
 import "strconv"
@@ -14,7 +14,6 @@ import "math/rand"
 import "context"
 import "unsafe"
 import "strings"
-import "sync"
 import "bytes"
 
 //import "math/rand"
@@ -72,28 +71,8 @@ type persistConn struct {
 	reused bool
 }
 
-func getParam(arr []int, md map[int]*PostParam, md2 map[int]PostParam) {
-	fmt.Printf("len=%d cap=%d\n", len(arr), cap(arr))
-	arr = append(arr, 1)
-	fmt.Printf("len=%d cap=%d\n", len(arr), cap(arr))
-	md[3] = &PostParam{
-		Cid: 123,
-		Uid: 456,
-	}
-	md2[11] = PostParam{
-		Cid: 111,
-		Uid: 444,
-	}
-}
-
 func ap(a []int) {
 	a = append(a, 10)
-}
-
-func add(a *[]int) {
-	*a = append(*a, 3)
-	*a = append(*a, 4)
-	*a = append(*a, 5)
 }
 
 func ffff() (string, error) {
@@ -123,16 +102,17 @@ func f123(bbool *bool) {
 }
 
 func main() {
-	fmt.Print(strings.TrimLeft(" \t\n  \r 123Hello, 111111", "\r\t\n "))
-	fmt.Print(strings.TrimLeft("¡¡¡!!!Hello, Gophers!!!", "!¡"))
-	fmt.Println(strings.Replace("oinkkk oink oink", "k", "ky", 10))
-	fmt.Println(strings.TrimSpace(" \t\n Hello, Gophers \n\t\r\n123"))
+	if false {
+		fmt.Print(strings.TrimLeft(" \t\n  \r 123Hello, 111111", "\r\t\n "))
+		fmt.Print(strings.TrimLeft("¡¡¡!!!Hello, Gophers!!!", "!¡"))
+		fmt.Println(strings.Replace("oinkkk oink oink", "k", "ky", 10))
+		fmt.Println(strings.TrimSpace(" \t\n Hello, Gophers \n\t\r\n123"))
+	}
+
 	if false {
 		bbool := false
 		f123(&bbool)
 		fmt.Println("b=", bbool)
-		strconv.Atoi()
-
 	}
 	if false { // slice len 清0 cap不变
 		letters := []string{"a", "b", "c", "d"}
@@ -165,21 +145,6 @@ func main() {
 	}
 
 	if false {
-		m1 := make(map[int32]int32)
-
-		m1[123] = 1
-		m1[456] = 1
-		m1[789] += 2
-		m1[123] += 2
-		m1[555]++
-		m1[555]++
-		m1[555]++
-		ss := m1[111]
-		fmt.Printf("%+v ss:%d\n", m1, ss)
-
-	}
-
-	if false {
 		failLogName := fmt.Sprintf("fail.%d.txt", time.Now().Unix())
 		file, err := os.OpenFile(failLogName, os.O_CREATE|os.O_TRUNC, 0666)
 		if err != nil {
@@ -191,44 +156,6 @@ func main() {
 		file.WriteString(data)
 		file.WriteString("\n")
 		file.WriteString(data)
-	}
-	if false { // WaitGroup 的坑
-		var n sync.WaitGroup
-		ic := make(chan int)
-		n.Add(1) //这个add非常重要，这里不add的话，可能下面的go线程还没来得及add(1)，然后就到了wait()直接退出了
-		go func(n *sync.WaitGroup) {
-			defer n.Done()
-			for i := 0; i < 3; i++ {
-				n.Add(1)
-				go func(i int, n *sync.WaitGroup, ic chan<- int) {
-					defer n.Done()
-					ic <- i
-				}(i, n, ic)
-			}
-		}(&n)
-
-		go func() {
-			n.Wait()
-			fmt.Println("close ch")
-			close(ic)
-		}()
-		for i := range ic {
-			fmt.Println(i)
-		}
-	}
-
-	if false {
-		ic := make(chan int)``
-		go func() {
-			ic <- 1
-			ic <- 2
-			close(ic)
-		}()
-		go func() {
-			for i := range ic {
-				fmt.Println(i)
-			}
-		}()
 	}
 
 	if false {
@@ -272,12 +199,6 @@ func main() {
 	}
 
 	if false {
-		s := make([]int, 0, 0)
-		add(&s)
-		fmt.Printf("%+v\n", s)
-	}
-
-	if false {
 		a := []int{}
 		a = append(a, 7, 8, 9)
 		fmt.Printf("len: %d cap:%d data:%+v\n", len(a), cap(a), a)
@@ -298,18 +219,6 @@ func main() {
 		q := uintptr(p) + 8
 		t := (*int)(unsafe.Pointer(q))
 		fmt.Println(*t)
-	}
-
-	if false { //slice作为函数参数
-		arr := make([]int, 0, 4)
-		fmt.Printf("len=%d cap=%d\n", len(arr), cap(arr))
-		md := make(map[int]*PostParam)
-		md2 := make(map[int]PostParam)
-		getParam(arr, md, md2)
-		fmt.Printf("len=%d cap=%d\n", len(arr), cap(arr))
-		fmt.Printf("%+v\n", arr)
-		fmt.Printf("%+v\n", md)
-		fmt.Printf("%+v\n", md2)
 	}
 
 	if false {
@@ -335,6 +244,7 @@ func main() {
 
 	}
 
+	//	for循环的坑
 	if false {
 		var stus []*student
 		stus = []*student{
@@ -409,27 +319,6 @@ func main() {
 	}
 
 	if false {
-		res := make(map[int64][]*PostParam)
-		p := &PostParam{
-			Cid: 0,
-			Sid: 1,
-			Uid: 2,
-		}
-		res[123] = append(res[123], p)
-		res[123] = append(res[123], p)
-		fmt.Println(res)
-		//下面的写法比较多余
-		if list, ok := res[234]; !ok {
-			res[234] = make([]*PostParam, 0)
-			//错误写法，不存在是不可以使用list   list = append(list, p)
-			res[234] = append(res[234], p)
-		} else {
-			list = append(list, p)
-		}
-		fmt.Println(res)
-	}
-
-	if false {
 		uri := (1<<8 | 26)
 		fmt.Println("uri1=", uri)
 		tt := 1 << 8
@@ -437,23 +326,6 @@ func main() {
 		fmt.Println("uri2=", res)
 		re := 2 | 16
 		fmt.Println(re)
-
-	}
-
-	if false {
-		//map不是协程(goroutine)安全的
-		m := make(map[int]int)
-		go func() {
-			for {
-				_ = m[1]
-			}
-		}()
-		go func() {
-			for {
-				m[2] = 2
-			}
-		}()
-		select {}
 
 	}
 
@@ -467,25 +339,6 @@ func main() {
 		//在没有seed的情况下，每次执行idx=1
 		idx := rand.Intn(4)
 		fmt.Println("idx=", idx)
-	}
-
-	if false {
-		//并发不安全，多个协程对同一个变量进行读写操作。所以需要原子操作来保证线程安全.
-		var cnt uint32 = 0
-		for i := 0; i < 10; i++ {
-			go func() {
-				for i := 0; i < 20; i++ {
-					time.Sleep(time.Millisecond)
-					//atomic.AddUint32(&cnt, 1)
-					cnt = cnt + 1
-				}
-			}()
-		}
-		time.Sleep(time.Second) //等一秒钟等goroutine完成
-		//cntFinal := atomic.LoadUint32(&cnt) //取数据
-		//fmt.Println("cnt:", cntFinal)
-
-		fmt.Println("cnt:", cnt)
 	}
 
 	if false { // "container/list"
@@ -530,16 +383,6 @@ func main() {
 		q.Set("password", "passwd")
 		u.RawQuery = q.Encode()
 		fmt.Println(u.String())
-	}
-
-	if false { //解析json
-		result := make([]*PostParam, 0)
-		jsonstr := `[{"tid":61032445,"sid":2233637304,"uid":123456},{"tid":234,"sid":2345,"uid":654321}]`
-		err := json.Unmarshal([]byte(jsonstr), &result)
-		if err != nil {
-			fmt.Printf("Err:%v\n", err)
-		}
-		fmt.Printf("Data:+%v\n", result[0])
 	}
 
 	if false {

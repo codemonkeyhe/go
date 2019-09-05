@@ -1,0 +1,16 @@
+{
+	"m1_mysql" :
+		{
+			"host" : "rm-j6cghxwww",
+			"port" : "3306",
+			"db" : "ppoker",
+			"username" : "ppp_poker_rw", "password" : "P1"
+		},
+	"m1_mysql_activity" :
+		{
+			"host" : "rm-j6cghxwww",
+			"port" : "3306",
+			"db" : "pppovity",
+			"username" : "ppp_poker_rw", "password" : "P"
+		}
+}
