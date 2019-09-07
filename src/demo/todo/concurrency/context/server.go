@@ -34,9 +34,8 @@ func main() {
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
 
-// handleSearch handles URLs like /search?q=golang&timeout=1s by forwarding the
-// query to google.Search. If the query param includes timeout, the search is
-// canceled after that duration elapses.
+// handleSearch handles URLs like /search?q=golang&timeout=1s by forwarding the query to google.Search.
+// If the query param includes timeout, the search is canceled after that duration elapses.
 func handleSearch(w http.ResponseWriter, req *http.Request) {
 	// ctx is the Context for this handler. Calling cancel closes the
 	// ctx.Done channel, which is the cancellation signal for requests
