@@ -5,7 +5,7 @@ import "fmt"
 import "path"
 import "net/url"
 
-import "demo/tt"
+//import "demo/tt"
 import "time"
 import "strconv"
 import "container/list"
@@ -225,8 +225,8 @@ func main() {
 		idleConnCh := make(map[string]chan *persistConn)
 		key := "123"
 		waitingDialer := idleConnCh[key]
-		fmt.Println("%+v", waitingDialer) //访问不存在的元素 为值类型的空值nil,而且map不会新增元素
-		fmt.Println("%#v", idleConnCh)
+		fmt.Printf("%+v\n", waitingDialer) //访问不存在的元素 为值类型的空值nil,而且map不会新增元素
+		fmt.Printf("%#v\n", idleConnCh)
 	}
 
 	if false {
@@ -358,8 +358,8 @@ func main() {
 	}
 
 	if false {
-		ss := tt.GetFileName()
-		fmt.Println(ss)
+		//ss := tt.GetFileName()
+		//fmt.Println(ss)
 	}
 
 	if false {

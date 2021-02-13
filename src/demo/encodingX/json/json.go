@@ -1,13 +1,15 @@
 package main
 
-import "fmt"
+import (
+	"bytes"
+	"encoding/json"
+	"fmt"
+	"io/ioutil"
+	"os"
+)
 
 //import "path"
 //import "net/url"
-import "encoding/json"
-import "bytes"
-import "os"
-import "io/ioutil"
 
 //import "demo/test/tt"
 //import "time"
@@ -48,7 +50,8 @@ type AppManagerResp struct {
 }
 
 type Data struct {
-	Val string `json:"val"`
+	Val  string `json:"val"`
+	Real bool   `json:"real"`
 }
 
 type Data1 struct {
@@ -101,8 +104,37 @@ type DBValue struct {
 	TimeoutMs int64  `json:"timeoutms"`
 }
 
+type SA struct {
+	Numberk *int64   `json:"numberk"`
+	Stringk *string  `json:"stringk"`
+	Arrayk  []*Param `json:"arrayk"`
+	Objectk *DBValue `json:"objectk"`
+}
+
 func main() {
+	//测试 json里面 各种类型为NULL的场景
 	if true {
+		data := `{"numberk":null, "stringk":null,  "arrayk":null, "objectk":null}`
+		var sa SA
+		err := json.Unmarshal([]byte(data), &sa)
+		if err != nil {
+			fmt.Printf("UnMarshal Err: %+v\n", err)
+		} else {
+			fmt.Printf("%+v\n", sa)
+			if sa.Stringk == nil {
+				fmt.Println("string == nil")
+			}
+			if sa.Numberk == nil {
+				fmt.Println("number == nil")
+			}
+			if sa.Objectk == nil {
+				fmt.Println("object == nil")
+			}
+		}
+
+	}
+
+	if false {
 		jsonFile, err := os.Open("demo.json")
 		if err != nil {
 			fmt.Println(err)
@@ -124,7 +156,8 @@ func main() {
 
 	if false { // 字符串含有&时marshal乱码
 		origin := &Data{
-			Val: "Hello&&&World",
+			Val:  "Hello&&&World",
+			Real: true,
 		}
 		b, _ := json.Marshal(origin)
 		fmt.Printf("%+v\n", string(b))
@@ -220,7 +253,7 @@ func main() {
 		// 无status字段，则反解时，status为空字符串
 		//data := `{"appid":30032,"expand":"{\"req_chn\":\"216172782113791086\"}","seq":2147483646,"sid":1350228370,"subsidapp":1,"succssids":[1350228370]}`
 		// 当expand为object时，不能直接反序列化为string
-		data := `{"appid":30032,"expan":{"req_chn":"216172782113791086", "name":"高清", "gear":1},"seq":2147483646,"sid":1350228370,"succssids":[1350228370]}`
+		data := `{"appid":30032,"expand":{"req_chn":"216172782113791086", "name":"高清", "gear":1},"seq":2147483646,"sid":1350228370,"succssids":[1350228370]}`
 		var resp AppManagerResp
 		err := json.Unmarshal([]byte(data), &resp)
 		if err != nil {
@@ -244,8 +277,8 @@ func main() {
 		//m := Message{"Alice", "Hello", 1294706395881, "test", 404, "ddd", 1024, &s1}
 
 		m := Message{"Alice", "Hello", 1294706395881, "test", 404, "ddd", 1024, nil}
-		// {"name":"Alice","body":"Hello","ts":"1294706395881","source":1024,"s1":null}
-		// 当 Source1 *int64 `json:"s1,omitempty"`  则为{"name":"Alice","body":"Hello","ts":"1294706395881","source":1024}
+		// {"name":"Alice","body":"Hello","ts":"1294706395881","source":1024,"s1":null}   即nil转成了 null
+		// 当 Source1 *int64 `json:"s1,omitempty"`  则为{"name":"Alice","body":"Hello","ts":"1294706395881","source":1024}  nil被忽略膂
 
 		//m := Message{"Alice", "Hello", 0, "test", 404, "ddd", 1024, nil}
 		//{"name":"Alice","body":"Hello","source":1024,"s1":null}
